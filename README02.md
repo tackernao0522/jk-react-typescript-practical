@@ -261,3 +261,127 @@ export const Todo = (
     return <p>{`${completeMark} ${title}(ユーザー: ${userId})`}</p>;
 };
 ```
+
+## コンポーネント自体の型定義<br>
+
++ `src/Text.tsx`コンポーネントを作成<br>
+
+```
+export const Text = () => {
+    return <p>テキストです</p>
+}
+```
+
++ `App.tsx`を編集<br>
+
+```
+import axios from "axios";
+import React, { useState } from "react";
+import "./App.css";
+import { Todo } from "./Todo";
+import { TodoType } from "./types/todo";
+import { Text } from "./Text"; // 追記
+
+function App() {
+  const [todos, setTodos] = useState<Array<TodoType>>([]); // 空の配列を初期値にして真っ白な画面にするクリック後はデータ表示される
+  const onClickFetchData = () => {
+    axios.get<Array<TodoType>>("https://jsonplaceholder.typicode.com/todos").then(res => {
+      setTodos(res.data);
+    });
+  };
+  return (
+    <div className="App">
+      <Text /> // 追記
+      <button onClick={onClickFetchData}>データ取得</button>
+      {todos.map(todo => <Todo key={todo.id} title={todo.title} userId={todo.userId} completed={todo.completed} />)}
+    </div>
+  );
+}
+
+export default App;
+```
+
++ `Text.tsx`を編集<br>
+
+```
+type Props = {
+    color: string;
+    fontSize: string;
+};
+
+export const Text = (props: Props) => {
+    const { color, fontSize } = props;
+    return <p style={{ color, fontSize }}>テキストです</p>
+}
+```
+
++ `App.tsx`を編集<br>
+
+```
+import axios from "axios";
+import React, { useState } from "react";
+import "./App.css";
+import { Todo } from "./Todo";
+import { TodoType } from "./types/todo";
+import { Text } from "./Text";
+
+function App() {
+  const [todos, setTodos] = useState<Array<TodoType>>([]); // 空の配列を初期値にして真っ白な画面にするクリック後はデータ表示される
+  const onClickFetchData = () => {
+    axios
+      .get<Array<TodoType>>("https://jsonplaceholder.typicode.com/todos")
+      .then(res => {
+        setTodos(res.data);
+      });
+  };
+  return (
+    <div className="App">
+      <Text color="red" fontSize="18px" />
+      <button onClick={onClickFetchData}>データ取得</button>
+      {todos.map(todo =>
+        <Todo
+          key={todo.id}
+          title={todo.title}
+          userId={todo.userId}
+          completed={todo.completed}
+        />
+      )}
+    </div>
+  );
+}
+
+export default App;
+```
+
++ `src/Text.tsx`を編集<br>
+
+```
+import { VFC } from "react";
+
+type Props = {
+    color: string;
+    fontSize: string;
+};
+
+// FCという型は暗黙的にchildrenを受けられるようになっているのでVFCを使用した方が良い。React ver18からはFCでも暗黙的にchildrenが含まれなくなる
+export const Text: VFC<Props> = (props) => {
+    const { color, fontSize } = props;
+    return <p style={{ color, fontSize }}>テキストです</p>
+}
+```
+
++ `src/Todo.tsx`コンポーネントに型定義<br>
+
+```
+import { VFC } from "react";
+import { TodoType } from "./types/todo";
+
+export const Todo: VFC<Omit<TodoType, "id">> = (
+  // props: Pick<TodoType, "userId" | "title" | "completed">
+    props
+) => {
+    const { title, userId, completed = false } = props; // completedのデフォルト値をfalseにしている
+    const completeMark = completed ? "[完]" : "[未]";
+    return <p>{`${completeMark} ${title}(ユーザー: ${userId})`}</p>;
+};
+```
