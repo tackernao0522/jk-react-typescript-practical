@@ -197,10 +197,67 @@ function App() {
   return (
     <div className="App">
       <button onClick={onClickFetchData}>データ取得</button>
-      {todos.map(todo => <Todo title={todo.title} userId={todo.userId} completed={todo.completed} />)}
+      {todos.map(todo => <Todo key={todo.id} title={todo.title} userId={todo.userId} completed={todo.completed} />)}
     </div>
   );
 }
 
 export default App;
+```
+
+## 型定義を効率的に管理する
+
++ `src/types`ディレクトリを作成<br>
+
++ `src/types/todo.ts`ファイルを作成<br>
+
+```
+export type TodoType = {
+    userId: number;
+    id: number;
+    title: string;
+    completed?: boolean;
+};
+```
+
++ `App.tsx`を編集<br>
+
+```
+import axios from "axios";
+import React, { useState } from "react";
+import "./App.css";
+import { Todo } from "./Todo";
+import { TodoType } from "./types/todo";
+
+function App() {
+  const [todos, setTodos] = useState<Array<TodoType>>([]); // 空の配列を初期値にして真っ白な画面にするクリック後はデータ表示される
+  const onClickFetchData = () => {
+    axios.get<Array<TodoType>>("https://jsonplaceholder.typicode.com/todos").then(res => {
+      setTodos(res.data);
+    });
+  };
+  return (
+    <div className="App">
+      <button onClick={onClickFetchData}>データ取得</button>
+      {todos.map(todo => <Todo key={todo.id} title={todo.title} userId={todo.userId} completed={todo.completed} />)}
+    </div>
+  );
+}
+
+export default App;
+```
+
++ `src/Todo.tsx`を編集<br>
+
+```
+import { TodoType } from "./types/todo";
+
+export const Todo = (
+    // props: Pick<TodoType, "userId" | "title" | "completed"> // TodoTypeの型定義をできる
+    props: Omit<TodoType, "id"> // Omitはその逆でidを覗くことができる
+) => {
+    const { title, userId, completed = false } = props; // completedのデフォルト値をfalseにしている
+    const completeMark = completed ? "[完]" : "[未]";
+    return <p>{`${completeMark} ${title}(ユーザー: ${userId})`}</p>;
+};
 ```
