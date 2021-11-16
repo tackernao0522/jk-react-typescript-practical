@@ -534,3 +534,9 @@ export const UserProfile: VFC<Props> = (props) => {
     )
 }
 ```
+
+## ライブラリの型定義について(react-router-domの例)
+
++ `$ npm install react-router-dom@5.3.0 or $ yarn add react-router-dom@5.3.0`<br>
+
++ `$ npm install @types/react-router-dom@5.3.0 or $ yarn add @types/react-router-dom@5.3.0`<br>
