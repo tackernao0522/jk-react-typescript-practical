@@ -2,13 +2,7 @@ import axios from "axios";
 import React, { useState } from "react";
 import "./App.css";
 import { Todo } from "./Todo";
-
-type TodoType = {
-  userId: number;
-  id: number;
-  title: string;
-  completed: boolean;
-};
+import { TodoType } from "./types/todo";
 
 function App() {
   const [todos, setTodos] = useState<Array<TodoType>>([]); // 空の配列を初期値にして真っ白な画面にするクリック後はデータ表示される
@@ -20,7 +14,7 @@ function App() {
   return (
     <div className="App">
       <button onClick={onClickFetchData}>データ取得</button>
-      {todos.map(todo => <Todo title={todo.title} userId={todo.userId} completed={todo.completed} />)}
+      {todos.map(todo => <Todo key={todo.id} title={todo.title} userId={todo.userId} completed={todo.completed} />)}
     </div>
   );
 }
