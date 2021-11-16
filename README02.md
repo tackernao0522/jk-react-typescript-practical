@@ -385,3 +385,152 @@ export const Todo: VFC<Omit<TodoType, "id">> = (
     return <p>{`${completeMark} ${title}(ユーザー: ${userId})`}</p>;
 };
 ```
+
+## オプショナルチェイニングでnull 安全なコードを書く
+
++ `src/UserProfile.tsx`コンポーネントを作成<br>
+
+```
+import { VFC } from "react"
+import { User } from "./types/user"
+
+type Props = {
+    user: User;
+}
+
+export const UserProfile: VFC<Props> = (props) => {
+    const { user } = props;
+    return (
+        <dl>
+            <dt>名前</dt>
+            <dd>{user.name}</dd>
+            <dt>趣味</dt>
+            <dd>{user.hobbies.join(" / ")}</dd>
+        </dl>
+    )
+}
+```
+
++ `src/types/user.ts`ファイルを作成<br>
+
+```
+export type User = {
+    name: string;
+    hobbies?: Array<string>;
+}
+```
+
++ `App.tsx`を編集<br>
+
+```
+import axios from "axios";
+import React, { useState } from "react";
+import "./App.css";
+import { Todo } from "./Todo";
+import { TodoType } from "./types/todo";
+import { Text } from "./Text";
+import { UserProfile } from "./UserProfile";
+import { User } from "./types/user";
+
+const user: User  = {
+  name: "たかき",
+  hobbies: ["映画", "ゲーム"],
+}
+
+function App() {
+  const [todos, setTodos] = useState<Array<TodoType>>([]); // 空の配列を初期値にして真っ白な画面にするクリック後はデータ表示される
+  const onClickFetchData = () => {
+    axios
+      .get<Array<TodoType>>("https://jsonplaceholder.typicode.com/todos")
+      .then(res => {
+        setTodos(res.data);
+      });
+  };
+  return (
+    <div className="App">
+      <UserProfile user={user} />
+      <Text color="red" fontSize="18px" />
+      <button onClick={onClickFetchData}>データ取得</button>
+      {todos.map(todo =>
+        <Todo
+          key={todo.id}
+          title={todo.title}
+          userId={todo.userId}
+          completed={todo.completed}
+        />
+      )}
+    </div>
+  );
+}
+
+export default App;
+```
+
++ `App.tsx`を編集(hobbiesがない場合)<br>
+
+```
+import axios from "axios";
+import React, { useState } from "react";
+import "./App.css";
+import { Todo } from "./Todo";
+import { TodoType } from "./types/todo";
+import { Text } from "./Text";
+import { UserProfile } from "./UserProfile";
+import { User } from "./types/user";
+
+const user: User  = {
+  name: "たかき",
+  // hobbies: ["映画", "ゲーム"], // hobbiesがない場合
+}
+
+function App() {
+  const [todos, setTodos] = useState<Array<TodoType>>([]); // 空の配列を初期値にして真っ白な画面にするクリック後はデータ表示される
+  const onClickFetchData = () => {
+    axios
+      .get<Array<TodoType>>("https://jsonplaceholder.typicode.com/todos")
+      .then(res => {
+        setTodos(res.data);
+      });
+  };
+  return (
+    <div className="App">
+      <UserProfile user={user} />
+      <Text color="red" fontSize="18px" />
+      <button onClick={onClickFetchData}>データ取得</button>
+      {todos.map(todo =>
+        <Todo
+          key={todo.id}
+          title={todo.title}
+          userId={todo.userId}
+          completed={todo.completed}
+        />
+      )}
+    </div>
+  );
+}
+
+export default App;
+```
+
++ `src/UserProfile.tsx`を編集(オプショナルチェイニング)<br>
+
+```
+import { VFC } from "react"
+import { User } from "./types/user"
+
+type Props = {
+    user: User;
+}
+
+export const UserProfile: VFC<Props> = (props) => {
+    const { user } = props;
+    return (
+        <dl>
+            <dt>名前</dt>
+            <dd>{user.name}</dd>
+            <dt>趣味</dt>
+            <dd>{user.hobbies?.join(" / ")}</dd> // ?をつける
+        </dl>
+    )
+}
+```
