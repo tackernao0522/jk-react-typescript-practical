@@ -4,6 +4,13 @@ import "./App.css";
 import { Todo } from "./Todo";
 import { TodoType } from "./types/todo";
 import { Text } from "./Text";
+import { UserProfile } from "./UserProfile";
+import { User } from "./types/user";
+
+const user: User  = {
+  name: "たかき",
+  // hobbies: ["映画", "ゲーム"],
+}
 
 function App() {
   const [todos, setTodos] = useState<Array<TodoType>>([]); // 空の配列を初期値にして真っ白な画面にするクリック後はデータ表示される
@@ -16,6 +23,7 @@ function App() {
   };
   return (
     <div className="App">
+      <UserProfile user={user} />
       <Text color="red" fontSize="18px" />
       <button onClick={onClickFetchData}>データ取得</button>
       {todos.map(todo =>
